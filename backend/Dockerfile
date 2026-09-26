@@ -14,6 +14,7 @@ WORKDIR /app/backend
 COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build --chown=node:node /app/backend/dist ./dist
+COPY backend/db ./db
 USER node
 EXPOSE 3000
 CMD ["node", "dist/backend/src/index.js"]
