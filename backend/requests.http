@@ -116,3 +116,85 @@ X-Actor-Id: {{alan}}
 Content-Type: application/json
 
 { "email": "shafi.goldwasser@example.com", "displayName": "Shafi Goldwasser" }
+
+
+###############################################################################
+# Roles
+###############################################################################
+
+### Grant Barbara two roles — the body is the whole set she should end up with
+PUT {{base}}/users/{{barbara}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["support", "viewer"] }
+
+### Send that again — 200, and nothing is written to the audit log
+PUT {{base}}/users/{{barbara}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["support", "viewer"] }
+
+### Revoke support by leaving it out, keeping viewer
+PUT {{base}}/users/{{barbara}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["viewer"] }
+
+### Revoke everything
+PUT {{base}}/users/{{barbara}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": [] }
+
+### A role that does not exist — expect 400 naming it
+PUT {{base}}/users/{{barbara}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["wizard"] }
+
+### Malformed user id — expect 400
+PUT {{base}}/users/not-a-uuid/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["viewer"] }
+
+### No such user — expect 404
+PUT {{base}}/users/99999999-9999-4999-8999-999999999999/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["viewer"] }
+
+### Support holds neither roles:grant nor roles:revoke — expect 403
+PUT {{base}}/users/{{barbara}}/roles
+X-Actor-Id: {{alan}}
+Content-Type: application/json
+
+{ "roles": ["viewer"] }
+
+### Demote Grace, leaving Ada the only user who can manage access
+PUT {{base}}/users/{{grace}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["viewer"] }
+
+### Now demote Ada — expect 409, and Ada keeps admin
+PUT {{base}}/users/{{ada}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["viewer"] }
+
+### Put Grace back
+PUT {{base}}/users/{{grace}}/roles
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "roles": ["admin"] }

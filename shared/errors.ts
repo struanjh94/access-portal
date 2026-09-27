@@ -5,6 +5,10 @@ export type ErrorCode =
   | 'forbidden'
   | 'invalid_body'
   | 'email_taken'
+  | 'invalid_user_id'
+  | 'user_not_found'
+  | 'unknown_role'
+  | 'last_admin'
   | 'internal_error';
 
 export type ErrorResponse = {

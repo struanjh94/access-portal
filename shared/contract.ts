@@ -23,3 +23,12 @@ export const CreateUserBody = z.strictObject({
 });
 
 export type CreateUserBody = z.infer<typeof CreateUserBody>;
+
+export const UpdateRolesBody = z.strictObject({
+  roles: z
+    .array(z.string().trim().min(1).max(64))
+    .max(20)
+    .transform((keys) => [...new Set(keys)].sort()),
+});
+
+export type UpdateRolesBody = z.infer<typeof UpdateRolesBody>;

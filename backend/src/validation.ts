@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { ApiError } from './errors.js';
 
 /**
@@ -19,4 +19,21 @@ export function parseBody<T extends z.ZodType>(schema: T, body: unknown): z.outp
     .join('; ');
 
   throw new ApiError('invalid_body', detail);
+}
+
+/**
+ * Validates a user id taken from the path.
+ *
+ * @param value The raw path segment, typed unknown because Express widens req.params
+ *   when a route carries middleware, so a string cannot be assumed.
+ * @returns The id, once it is a well-formed UUID.
+ * @throws ApiError invalid_user_id, which is a 400. z.guid rather than z.uuid,
+ *   because z.uuid also enforces the RFC 9562 version and variant bits that the
+ *   Postgres uuid type does not, so an id the database stores happily would be
+ *   rejected as malformed instead of returning 404.
+ */
+export function parseUserId(value: unknown): string {
+  const result = z.guid().safeParse(value);
+  if (!result.success) throw new ApiError('invalid_user_id');
+  return result.data;
 }
