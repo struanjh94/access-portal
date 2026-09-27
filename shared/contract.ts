@@ -54,4 +54,5 @@ export type Role = {
   key: string;
   name: string;
   description: string;
+  permissions: PermissionKey[];
 };

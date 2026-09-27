@@ -239,7 +239,20 @@ describe('GET /roles', () => {
       key: 'admin',
       name: 'Administrator',
       description: 'Full access: manage users and their roles, and read the audit log',
+      permissions: [
+        'audit:read',
+        'roles:grant',
+        'roles:read',
+        'roles:revoke',
+        'users:create',
+        'users:read',
+      ],
     });
+
+    expect(roles.find((role) => role.key === 'viewer')?.permissions).toEqual([
+      'roles:read',
+      'users:read',
+    ]);
   });
 
   /*
@@ -256,8 +269,12 @@ describe('GET /roles', () => {
 
     try {
       const res = await request(app).get('/roles').set('X-Actor-Id', MARGARET);
+      const roles = res.body as Role[];
 
-      expect((res.body as Role[]).map((role) => role.key)).toContain(orphan);
+      expect(roles.map((role) => role.key)).toContain(orphan);
+
+      /* A role granting nothing is still a role: the left join keeps it, with no permissions. */
+      expect(roles.find((role) => role.key === orphan)?.permissions).toEqual([]);
     } finally {
       await pool.query('delete from roles where key = $1', [orphan]);
     }

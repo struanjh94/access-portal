@@ -4,8 +4,24 @@ import { pool } from '../db/client.js';
 import { withTransaction } from '../db/transaction.js';
 import { ApiError } from '../errors.js';
 
-/* Ordered by key, so the order the UI renders roles in does not shift when one is renamed. */
-const LIST_ROLES = `select key, name, description from roles order by key`;
+/**
+ * Every role with the permissions it grants.
+ *
+ * Ordered by key, so the order the UI renders roles in does not shift when one is
+ * renamed. Left joined and coalesced because a role granting nothing is still a role,
+ * and an inner join would hide it.
+ */
+const LIST_ROLES = `
+  select r.key,
+         r.name,
+         r.description,
+         coalesce(array_agg(rp.permission_key order by rp.permission_key)
+                  filter (where rp.permission_key is not null), '{}') as permissions
+    from roles r
+    left join role_permissions rp on rp.role_key = r.key
+   group by r.key
+   order by r.key
+`;
 
 const SELECT_TARGET = `
   select id, email, display_name as "displayName", created_at as "createdAt"
@@ -178,8 +194,11 @@ export async function updateUserRoles(
 /**
  * Lists every role a user can be granted, including any nobody currently holds.
  *
- * @returns Roles ordered by key. The catalogue comes from the table rather than a
- *   constant, so a role added to the database appears without a code change.
+ * @returns Roles ordered by key, each with the permissions it grants. The catalogue
+ *   comes from the table rather than a constant, so a role added to the database
+ *   appears without a code change. Postgres returns the permission keys as plain text;
+ *   narrowing them to PermissionKey is safe because a test asserts the permissions
+ *   table matches the PERMISSIONS constant.
  */
 export async function listRoles(): Promise<Role[]> {
   const { rows } = await pool.query<Role>(LIST_ROLES);
