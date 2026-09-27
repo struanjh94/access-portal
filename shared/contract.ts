@@ -49,3 +49,9 @@ export type AuditLogEntry = {
   roleKey: string | null;
   details: AuditDetails;
 };
+
+export type Role = {
+  key: string;
+  name: string;
+  description: string;
+};

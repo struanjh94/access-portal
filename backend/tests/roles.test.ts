@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { afterAll, describe, expect, it } from 'vitest';
-import type { UserSummary } from '../../shared/contract.js';
+import type { Role, UserSummary } from '../../shared/contract.js';
 import type { ErrorResponse } from '../../shared/errors.js';
 import { app } from '../src/app.js';
 import { pool } from '../src/db/client.js';
@@ -8,6 +8,9 @@ import { pool } from '../src/db/client.js';
 const ADA = '11111111-1111-4111-8111-111111111111';
 const GRACE = '22222222-2222-4222-8222-222222222222';
 const ALAN = '33333333-3333-4333-8333-333333333333';
+
+const MARGARET = '55555555-5555-4555-8555-555555555555';
+const BARBARA = '66666666-6666-4666-8666-666666666666';
 
 const TEST_DOMAIN = '@roles-test.example.com';
 
@@ -221,5 +224,56 @@ describe('PUT /users/:id/roles', () => {
     expect(res.status).toBe(409);
     expect((res.body as ErrorResponse).error.code).toBe('last_admin');
     expect(await rolesHeldBy(ADA)).toEqual(['admin']);
+  });
+});
+
+describe('GET /roles', () => {
+  it('returns every role with its name and description, ordered by key', async () => {
+    const res = await request(app).get('/roles').set('X-Actor-Id', MARGARET);
+
+    expect(res.status).toBe(200);
+
+    const roles = res.body as Role[];
+    expect(roles.map((role) => role.key)).toEqual(['admin', 'support', 'viewer']);
+    expect(roles[0]).toEqual({
+      key: 'admin',
+      name: 'Administrator',
+      description: 'Full access: manage users and their roles, and read the audit log',
+    });
+  });
+
+  /*
+   * The catalogue is what lets the UI offer a role again after the last person holding
+   * it loses it, so it cannot be derived from what users currently hold.
+   */
+  it('includes a role nobody holds', async () => {
+    const orphan = `orphan-${Date.now()}`;
+
+    await pool.query(
+      `insert into roles (key, name, description) values ($1, 'Orphan', 'Held by nobody')`,
+      [orphan],
+    );
+
+    try {
+      const res = await request(app).get('/roles').set('X-Actor-Id', MARGARET);
+
+      expect((res.body as Role[]).map((role) => role.key)).toContain(orphan);
+    } finally {
+      await pool.query('delete from roles where key = $1', [orphan]);
+    }
+  });
+
+  it('rejects an actor without roles:read', async () => {
+    const res = await request(app).get('/roles').set('X-Actor-Id', BARBARA);
+
+    expect(res.status).toBe(403);
+    expect((res.body as ErrorResponse).error.message).toMatch(/roles:read/);
+  });
+
+  it('rejects a request with no actor', async () => {
+    const res = await request(app).get('/roles');
+
+    expect(res.status).toBe(401);
+    expect((res.body as ErrorResponse).error.code).toBe('missing_actor');
   });
 });

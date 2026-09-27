@@ -2,6 +2,7 @@
 export const PERMISSIONS = {
   USERS_READ: 'users:read',
   USERS_CREATE: 'users:create',
+  ROLES_READ: 'roles:read',
   ROLES_GRANT: 'roles:grant',
   ROLES_REVOKE: 'roles:revoke',
   AUDIT_READ: 'audit:read'

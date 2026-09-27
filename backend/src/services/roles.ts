@@ -1,7 +1,11 @@
-import type { Actor, UpdateRolesBody, UserSummary } from '../../../shared/contract.js';
+import type { Actor, Role, UpdateRolesBody, UserSummary } from '../../../shared/contract.js';
 import { PERMISSIONS } from '../../../shared/permissions.js';
+import { pool } from '../db/client.js';
 import { withTransaction } from '../db/transaction.js';
 import { ApiError } from '../errors.js';
+
+/* Ordered by key, so the order the UI renders roles in does not shift when one is renamed. */
+const LIST_ROLES = `select key, name, description from roles order by key`;
 
 const SELECT_TARGET = `
   select id, email, display_name as "displayName", created_at as "createdAt"
@@ -169,4 +173,15 @@ export async function updateUserRoles(
 
     return { ...target, createdAt: target.createdAt.toISOString(), roles: input.roles };
   });
+}
+
+/**
+ * Lists every role a user can be granted, including any nobody currently holds.
+ *
+ * @returns Roles ordered by key. The catalogue comes from the table rather than a
+ *   constant, so a role added to the database appears without a code change.
+ */
+export async function listRoles(): Promise<Role[]> {
+  const { rows } = await pool.query<Role>(LIST_ROLES);
+  return rows;
 }

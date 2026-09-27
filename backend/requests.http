@@ -219,3 +219,12 @@ X-Actor-Id: {{margaret}}
 ### Through nginx, the path the browser uses
 GET {{proxy}}/audit-logs
 X-Actor-Id: {{ada}}
+
+
+### The roles that can be granted — reference data for the management view
+GET {{base}}/roles
+X-Actor-Id: {{margaret}}
+
+### Barbara holds no roles, so no roles:read — expect 403
+GET {{base}}/roles
+X-Actor-Id: {{barbara}}

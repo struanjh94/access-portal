@@ -4,6 +4,7 @@ import { errorHandler } from './middleware/error-handler.js';
 import { auditLogsRouter } from './routes/audit-logs.js';
 import { healthRouter } from './routes/health.js';
 import { meRouter } from './routes/me.js';
+import { rolesRouter } from './routes/roles.js';
 import { usersRouter } from './routes/users.js';
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(healthRouter);
 app.use(resolveActor);
 app.use(meRouter);
 app.use(usersRouter);
+app.use(rolesRouter);
 app.use(auditLogsRouter);
 
 app.use(errorHandler);

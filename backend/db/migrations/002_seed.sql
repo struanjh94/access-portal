@@ -7,6 +7,7 @@ on conflict (key) do nothing;
 insert into permissions (key, description) values
   ('users:read',   'View users and their assigned roles'),
   ('users:create', 'Add a new user'),
+  ('roles:read',   'View the roles that can be granted'),
   ('roles:grant',  'Assign a role to a user'),
   ('roles:revoke', 'Remove a role from a user'),
   ('audit:read',   'View the audit log')
@@ -15,12 +16,15 @@ on conflict (key) do nothing;
 insert into role_permissions (role_key, permission_key) values
   ('admin',   'users:read'),
   ('admin',   'users:create'),
+  ('admin',   'roles:read'),
   ('admin',   'roles:grant'),
   ('admin',   'roles:revoke'),
   ('admin',   'audit:read'),
   ('support', 'users:read'),
+  ('support', 'roles:read'),
   ('support', 'audit:read'),
-  ('viewer',  'users:read')
+  ('viewer',  'users:read'),
+  ('viewer',  'roles:read')
 on conflict do nothing;
 
 insert into users (id, email, display_name) values
