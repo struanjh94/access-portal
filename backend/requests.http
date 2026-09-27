@@ -57,3 +57,62 @@ X-Actor-Id: 99999999-9999-4999-8999-999999999999
 ### Malformed actor id — expect 400
 GET {{base}}/me
 X-Actor-Id: not-a-uuid
+
+
+###############################################################################
+# Users
+###############################################################################
+
+### List users and the roles they hold — as an admin
+GET {{base}}/users
+X-Actor-Id: {{ada}}
+
+### Same, as a viewer — users:read is enough
+GET {{base}}/users
+X-Actor-Id: {{margaret}}
+
+### No roles, so no users:read — expect 403
+GET {{base}}/users
+X-Actor-Id: {{barbara}}
+
+### Create a user — expect 201 and an empty roles array
+POST {{base}}/users
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "email": "radia.perlman@example.com", "displayName": "Radia Perlman" }
+
+### Send the block above twice — the second is a 409, email_taken
+POST {{base}}/users
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "email": "RADIA.PERLMAN@example.com", "displayName": "Radia Perlman" }
+
+### Email is trimmed and lowercased before it is stored
+POST {{base}}/users
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "email": "  Sophie.Wilson@Example.COM  ", "displayName": "  Sophie Wilson  " }
+
+### Invalid email and empty display name — expect 400 naming both fields
+POST {{base}}/users
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "email": "not-an-email", "displayName": "" }
+
+### Unrecognised field — expect 400, roles are granted by their own endpoint
+POST {{base}}/users
+X-Actor-Id: {{ada}}
+Content-Type: application/json
+
+{ "email": "karen.jones@example.com", "displayName": "Karen Sparck Jones", "roles": ["admin"] }
+
+### Support may read users but not create them — expect 403
+POST {{base}}/users
+X-Actor-Id: {{alan}}
+Content-Type: application/json
+
+{ "email": "shafi.goldwasser@example.com", "displayName": "Shafi Goldwasser" }

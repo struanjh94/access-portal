@@ -19,7 +19,8 @@
     "noUncheckedSideEffectImports": true,
     "skipLibCheck": true,
 
-    "noEmit": true
+    "noEmit": true,
+    "paths": { "zod": ["./node_modules/zod/index.d.cts"] }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "../shared/**/*.ts", "vitest.config.ts"]
 }
