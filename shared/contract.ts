@@ -32,3 +32,20 @@ export const UpdateRolesBody = z.strictObject({
 });
 
 export type UpdateRolesBody = z.infer<typeof UpdateRolesBody>;
+
+export type AuditDetails = {
+  before?: string[];
+  after?: string[];
+};
+
+export type AuditLogEntry = {
+  id: string;
+  occurredAt: string;
+  action: 'user.created' | 'role.granted' | 'role.revoked';
+  actorId: string | null;
+  actorEmail: string;
+  targetUserId: string | null;
+  targetUserEmail: string;
+  roleKey: string | null;
+  details: AuditDetails;
+};

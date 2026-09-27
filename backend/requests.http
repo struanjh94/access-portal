@@ -198,3 +198,24 @@ X-Actor-Id: {{ada}}
 Content-Type: application/json
 
 { "roles": ["admin"] }
+
+
+###############################################################################
+# Audit log
+###############################################################################
+
+### The access change history, newest first — as an admin
+GET {{base}}/audit-logs
+X-Actor-Id: {{ada}}
+
+### Support holds audit:read too
+GET {{base}}/audit-logs
+X-Actor-Id: {{alan}}
+
+### Viewer holds only users:read — expect 403
+GET {{base}}/audit-logs
+X-Actor-Id: {{margaret}}
+
+### Through nginx, the path the browser uses
+GET {{proxy}}/audit-logs
+X-Actor-Id: {{ada}}
