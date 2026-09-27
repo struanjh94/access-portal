@@ -6,6 +6,7 @@ COPY backend/package.json backend/package-lock.json ./
 RUN npm ci
 COPY backend/tsconfig.json backend/tsconfig.build.json ./
 COPY backend/src ./src
+COPY shared /app/shared
 RUN npm run build
 
 FROM node:24-alpine AS runtime

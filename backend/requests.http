@@ -1,0 +1,59 @@
+# ============================================================================
+# Access Provisioning & Audit Portal — manual API requests
+#
+# Open in VS Code with the REST Client extension (humao.rest-client), or in
+# IntelliJ / WebStorm, which have an HTTP client built in. Click "Send Request"
+# above any block below.
+#
+# @base points at the API directly. Switch to @proxy to exercise the same
+# same-origin path the browser uses through nginx.
+# ============================================================================
+
+@base  = http://localhost:3000
+@proxy = http://localhost:8080/api
+
+# --- Seeded actors (see db/migrations/002_seed.sql) -------------------------
+@ada       = 11111111-1111-4111-8111-111111111111
+@grace     = 22222222-2222-4222-8222-222222222222
+@alan      = 33333333-3333-4333-8333-333333333333
+@katherine = 44444444-4444-4444-8444-444444444444
+@margaret  = 55555555-5555-4555-8555-555555555555
+@barbara   = 66666666-6666-4666-8666-666666666666
+
+# Ada, Grace  → admin
+# Alan        → support
+# Katherine   → support, viewer
+# Margaret    → viewer
+# Barbara     → no roles
+
+
+###############################################################################
+# Health
+###############################################################################
+
+### Health check — no actor header required
+GET {{base}}/health
+
+
+###############################################################################
+# Current actor
+###############################################################################
+
+### Who am I, and what may I do — as an admin
+GET {{base}}/me
+X-Actor-Id: {{ada}}
+
+### Same, as a viewer — expect a much shorter permission list
+GET {{base}}/me
+X-Actor-Id: {{margaret}}
+
+### No actor header — expect 401
+GET {{base}}/me
+
+### Unknown actor — expect 401
+GET {{base}}/me
+X-Actor-Id: 99999999-9999-4999-8999-999999999999
+
+### Malformed actor id — expect 400
+GET {{base}}/me
+X-Actor-Id: not-a-uuid
