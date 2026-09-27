@@ -44,9 +44,9 @@ create table audit_logs (
                       'role.granted',
                       'role.revoked'
                     )),
-  actor_id          uuid references users(id) on delete set null,
+  actor_id          uuid,
   actor_email       text not null,
-  target_user_id    uuid references users(id) on delete set null,
+  target_user_id    uuid,
   target_user_email text not null,
   role_key          text references roles(key),
   details           jsonb not null default '{}'
@@ -66,3 +66,7 @@ $$ language plpgsql;
 create trigger audit_logs_no_change
   before update or delete on audit_logs
   for each row execute function audit_logs_immutable();
+
+create trigger audit_logs_no_truncate
+  before truncate on audit_logs
+  for each statement execute function audit_logs_immutable();

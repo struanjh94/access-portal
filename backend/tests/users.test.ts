@@ -9,16 +9,19 @@ const ADA = '11111111-1111-4111-8111-111111111111';
 const ALAN = '33333333-3333-4333-8333-333333333333';
 const BARBARA = '66666666-6666-4666-8666-666666666666';
 
+const TEST_DOMAIN = '@users-test.example.com';
+
 /*
- * Created users are left behind rather than deleted: their audit entries hold a
- * reference to them, and the append-only trigger rejects the update the foreign
- * key would use to clear it. A fresh email per run keeps the unique index happy.
+ * A fresh address per run, because a run that fails before afterAll leaves its user
+ * behind and the email index is unique.
  */
 function uniqueEmail(): string {
-  return `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@users-test.example.com`;
+  return `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${TEST_DOMAIN}`;
 }
 
 afterAll(async () => {
+  /* Their audit entries survive: audit_logs records ids as values, not references. */
+  await pool.query('delete from users where email like $1', [`%${TEST_DOMAIN}`]);
   await pool.end();
 });
 
