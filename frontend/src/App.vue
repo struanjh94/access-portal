@@ -6,7 +6,7 @@ import { useRoles } from './stores/roles.js';
 
 const { state, actorId, load, select, can } = useActor();
 const { roles, load: loadRoles } = useRoles();
-const { people, peopleError, load: loadPeople } = usePeople();
+const { people, load: loadPeople } = usePeople();
 
 onMounted(async () => {
   await load();
@@ -44,11 +44,6 @@ async function onSelect(event: Event) {
             {{ person.displayName }}
           </option>
         </select>
-
-        <p v-if="!people.length" class="stuck">
-          Nobody can be listed with this account's access. Add
-          <code>?actor=&lt;user id&gt;</code> to the address to act as someone else.
-        </p>
       </div>
 
       <div class="grants">
@@ -85,8 +80,6 @@ async function onSelect(event: Event) {
         </p>
       </div>
     </section>
-
-    <p v-if="peopleError" class="notice">Could not load the list of people: {{ peopleError }}</p>
 
     <p v-if="state.loading" class="muted">Loading…</p>
     <p v-else-if="state.error" class="notice">{{ state.error }}</p>
@@ -176,18 +169,6 @@ main {
   background: #f7f9fb;
   color: var(--ink);
   font-size: var(--step-lead);
-}
-
-.stuck {
-  max-width: 20rem;
-  margin: var(--space-2) 0 0;
-  color: #f0b8b2;
-  font-size: var(--step-small);
-  line-height: 1.4;
-}
-
-.stuck code {
-  color: #fff;
 }
 
 .empty {

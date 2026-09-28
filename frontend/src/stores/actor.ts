@@ -2,12 +2,7 @@ import { computed, reactive, readonly } from 'vue';
 import type { Actor } from '../../../shared/contract.js';
 import type { PermissionKey } from '../../../shared/permissions.js';
 import { get } from '../api/client.js';
-
-/*
- * Stands in for single sign-on: a real deployment would resolve the signed-in user, so
- * this is the seeded admin. Anyone can be selected from the switcher afterwards.
- */
-export const DEFAULT_ACTOR_ID = '11111111-1111-4111-8111-111111111111';
+import { DEFAULT_ACTOR_ID } from '../demo-actors.js';
 
 type ActorState = {
   id: string;
