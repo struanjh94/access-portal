@@ -1,0 +1,6 @@
+# Publishes the database so the test suite, which runs on the host, can reach it.
+# Kept separate so `docker compose up` still needs only one free port.
+services:
+  postgres:
+    ports:
+      - '${POSTGRES_PORT:-5433}:5432'
